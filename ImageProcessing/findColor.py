@@ -8,13 +8,12 @@ class FindColor (videoControls.VideoControls):
     def __init__(self, videoName):
         super().__init__(videoName)
         self.__outputWindowName = "output of " + videoName
-        self.__videoName = videoName
 
     def __namingAndCreatingTrackbars(self):
         videoControls.cv.namedWindow(
             self.__outputWindowName, videoControls.cv.WINDOW_NORMAL)
         videoControls.cv.namedWindow(
-            self.__videoName, videoControls.cv.WINDOW_NORMAL)
+            self.videoName, videoControls.cv.WINDOW_NORMAL)
         self.__createTrackbars()
 
     def __change(self, value):
@@ -30,19 +29,19 @@ class FindColor (videoControls.VideoControls):
     def __showOutput(self,size):
         if size:
             self.outputFrame = videoControls.cv.resize(self.outputFrame, size)
+
+        
         videoControls.cv.imshow(self.__outputWindowName, self.outputFrame)
 
     def getColor(self, hsv_min=[], hsv_max=[], loop=False, size=False):
         self.getFrame(size=size, loop=loop)
 
         if self.frame.size:
-            hsvFrame = videoControls.cv.cvtColor(
-                self.frame, videoControls.cv.COLOR_BGR2HSV)
+            hsvFrame = videoControls.cv.cvtColor(self.frame, videoControls.cv.COLOR_BGR2HSV)
 
             if videoControls.numpy.array(hsv_min).size:
-                self.outputFrame = videoControls.cv.inRange(
-                    hsvFrame, videoControls.numpy.array(hsv_min), videoControls.numpy.array(hsv_max))
-                return
+                self.outputFrame = videoControls.cv.inRange(hsvFrame, videoControls.numpy.array(hsv_min), videoControls.numpy.array(hsv_max))
+                return self.outputFrame
 
             lower = []
             upper = []
@@ -55,16 +54,17 @@ class FindColor (videoControls.VideoControls):
                 upper.append(videoControls.cv.getTrackbarPos(
                     i, self.trackbarWindowName))
 
-            self.outputFrame = videoControls.cv.inRange(
-                hsvFrame, videoControls.numpy.array(lower), videoControls.numpy.array(upper))
+            self.outputFrame = videoControls.cv.inRange(hsvFrame, videoControls.numpy.array(lower), videoControls.numpy.array(upper))
         else:
             self.outputFrame = self.frame
+            
 
     def watch(self, size=False, loop=False):
 
         self.__namingAndCreatingTrackbars()
 
         while self.cap.isOpened():
-            self.getColor(loop=True, size=(1200, 800))
-            self.__showOutput(size=size)
+         self.getColor(size=size,loop=loop)
+         self.showFrame(size=size)
+         self.__showOutput(size=size)
            

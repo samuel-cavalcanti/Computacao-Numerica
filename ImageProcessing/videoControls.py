@@ -7,28 +7,43 @@ class VideoControls:
     __trackbarWindowName = 'Trackbars'
     __frameVideo = False
     __size = False
+    __vel = 1
     time = 'none'
     frame = numpy.array([])
 
     def __init__(self, nameOfVideo):
-        self.cap.open(nameOfVideo)
-        self.__videoName = nameOfVideo
-        self.__outputWindowName = "output of " + nameOfVideo
+        self.cap.open(nameOfVideo) 
+        self.videoName = nameOfVideo
         self.__frameWidth =  int (self.cap.get(cv.CAP_PROP_FRAME_WIDTH) )
         self.__frameHeight = int (self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))
 
-        pass
 
     def __videoControls(self):
-        key = cv.waitKey(int(self.cap.get(cv.CAP_PROP_FPS))) or 0xff
+        key = cv.waitKey(self.__vel) or 0xff
+
         if key == ord('p'):
             cv.waitKey(0)
         elif key == ord('q'):
             self.__closeVideo()
+        elif key == ord('a'):
+            self.__vel += 10
+        elif key == ord('s'):
+            if self.__vel > 1:
+                self.__vel -= 10
+            
 
     def __closeVideo(self):
         self.cap.release()
         cv.destroyAllWindows()
+
+    def showFrame(self,size):
+        if size:
+            self.frame = cv.resize(self.frame, size)
+
+        
+        cv.putText(self.frame,'delay:'+ str(self.__vel),org=(0,size[1] -10),fontFace=0,fontScale=2,color=(0,0,255) )
+        cv.imshow(self.videoName, self.frame)
+    
 
     def getFrame(self, size, loop):
 
@@ -42,12 +57,12 @@ class VideoControls:
 
            
         elif loop:
-            self.cap = cv.VideoCapture(self.__videoName)
+            self.cap = cv.VideoCapture(self.videoName)
         else:
             self.__closeVideo()
 
     def watch(self, size=False, loop=False):
-        cv.namedWindow(self.__videoName, cv.WINDOW_NORMAL)
+        cv.namedWindow(self.videoName, cv.WINDOW_NORMAL)
 
         while self.cap.isOpened():
             self.getFrame(size, loop)
