@@ -32,7 +32,7 @@ class photoControls:
 
     def show(self):
         __show_image__(self.input_image, self.photo_name)
-        # __show_image__(self.output_image, self.output_name)
+        __show_image__(self.output_image, self.output_name)
         __show_image__(self.hsv_image, self.hsv_name)
         cv2.waitKey(0)
 
@@ -126,7 +126,7 @@ class photoControls:
                 cv2.putText(self.output_image, "x:"+ str(cX) + " y: " +str(cY), (cX, cY), fontFace=2, fontScale=4, color=(255, 0, 50),thickness=4)
                 cv2.drawContours(self.output_image, contours=[c], contourIdx=0, color=(0, 255, 0), thickness=5)
                 cv2.circle(self.output_image,(cX,cY),1,(0,255,0), thickness=4)
-                #self.points = np.copy(c)
+                self.points = np.copy(c)
                 #self.__drawRects()
                 # with open('cts.txt','w') as file:
                 #     file.write(str(c))
