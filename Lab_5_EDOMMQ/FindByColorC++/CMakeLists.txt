@@ -30,8 +30,6 @@ add_executable(findByColor
 target_link_libraries( findByColor ${OpenCV_LIBS} )
 target_include_directories(findByColor PRIVATE ${INCLUDE_DIRS})
 
-message("file" ${HEADERS} )
-
 
 
 
