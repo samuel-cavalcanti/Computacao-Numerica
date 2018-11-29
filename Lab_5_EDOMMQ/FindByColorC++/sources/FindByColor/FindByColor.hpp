@@ -38,12 +38,19 @@ private:
     void saveTrackbars();
     void getTrackbarValue(std::stringstream streamLine, std::vector<int>* pos);
     void trackbarToStringstream(std::stringstream &line, std::vector<int>*pos);
+    void getMassCenter();
+    void calibrationColor();
+    void drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, cv::Point2f& massCenter);
+    bool getTheLargestContours(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours);
+    
     cv::Scalar vectorToScalar(std::vector<int>* pos);
     static void onChange(int, void*);
     std::string trackbarWindowName;
     std::string calibrationWindow;
+    std::string outputWindow;
     std::string nameOfFileTrackBars;
     std::string saveTrackbarName;
+    std::string minArea;
     cv::Mat* calibrationFrame;
     cv::Mat* outputFrame;
     std::vector<int>* lower;

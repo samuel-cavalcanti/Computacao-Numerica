@@ -15,11 +15,10 @@
 
 FindByColor::FindByColor(std::string &videoPath) : VideoControl(videoPath) {
     calibrationFrame = new cv::Mat();
-    outputFrame = NULL;
+    outputFrame = new cv::Mat();
     nameOfFileTrackBars = "lastPosTrackBars.csv";
     trackbarLowerNames = new std::vector<std::string>{"H_MIN", "S_MIN", "V_MIN"};
     trackbarUpperNames = new std::vector<std::string>{"H_MAX", "S_MAX", "V_MAX"};
-    saveTrackbarName = "save trackbars";
     createTrackbars();
     if (getSavedTrackbarsValues())
         setTrackbar();
@@ -52,10 +51,14 @@ void FindByColor::showVideo(bool loop) {
 }
 
 void FindByColor::imageProcessing() {
-    cv::Mat hsvFrame;
-    cv::cvtColor(currentFrame, hsvFrame, cv::COLOR_BGR2HSV);
     getTrackbarsPos();
-    cv::inRange(hsvFrame, vectorToScalar(lower), vectorToScalar(upper), *calibrationFrame);
+
+    calibrationColor();
+
+    getMassCenter();
+
+
+
     if (cv::getTrackbarPos(saveTrackbarName, trackbarWindowName)) {
         saveTrackbars();
         cv::setTrackbarPos(saveTrackbarName, trackbarWindowName, 0);
@@ -64,23 +67,83 @@ void FindByColor::imageProcessing() {
 
 }
 
+void FindByColor::calibrationColor() {
+    cv::Mat hsvFrame;
+    cv::cvtColor(currentFrame, hsvFrame, cv::COLOR_BGR2HSV);
+    cv::inRange(hsvFrame, vectorToScalar(lower), vectorToScalar(upper), *calibrationFrame);
+
+}
+
+void FindByColor::getMassCenter() {
+    int largestContourId;
+    std::vector<cv::Vec4i> hierarchy;
+    std::vector< std::vector<cv::Point> > contours;
+
+    if (not getTheLargestContours(largestContourId, hierarchy, contours))
+        return;
+
+    cv::Moments moment = cv::moments(contours[largestContourId]);
+
+    cv::Point2f massCenter(moment.m10 / moment.m00, moment.m01 / moment.m00);
+
+    drawOutput(largestContourId, hierarchy, contours, massCenter);
+
+}
+
+bool FindByColor::getTheLargestContours(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours) {
+    cv::findContours(*calibrationFrame, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_NONE);
+  //  double maxArea = cv::getTrackbarPos(minArea, trackbarWindowName); testes
+    double maxArea = 80;
+    bool haveContour = false;
+
+    for (unsigned int i = 0; i < contours.size(); i++) {
+        double currentArea = cv::contourArea(contours.at(i));
+        if (currentArea > maxArea) {
+
+            maxArea = currentArea;
+            largestContourId = i;
+            haveContour = true;
+        }
+
+    }
+
+    return haveContour;
+
+}
+
+void FindByColor::drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, cv::Point2f& massCenter) {
+    currentFrame.copyTo(*outputFrame);
+
+   // cv::drawContours(*outputFrame, contours, largestContourId, cv::Scalar(0, 0, 255), 2, 8, hierarchy);
+
+    cv::circle(*outputFrame, cv::Point((int) massCenter.x, (int) massCenter.y),1, cv::Scalar(255, 0, 0),2 , -1 );
+
+    showImageResized(outputWindow, *outputFrame);
+
+}
+
 void FindByColor::showImages() {
+
     showImageResized(windowInput, currentFrame);
     showImageResized(calibrationWindow, *calibrationFrame);
-
 }
 
 void FindByColor::createTrackbars() {
     trackbarWindowName = "Trackbars";
     calibrationWindow = "Calibration";
+    saveTrackbarName = "save trackbars";
+    minArea = "min area";
+    outputWindow = "output";
     cv::namedWindow(trackbarWindowName, cv::WINDOW_NORMAL);
     cv::namedWindow(calibrationWindow, cv::WINDOW_NORMAL);
+    cv::namedWindow(outputWindow, cv::WINDOW_NORMAL);
 
     for (std::string i :{"H_MIN", "S_MIN", "V_MIN", "H_MAX", "S_MAX", "V_MAX"})
         cv::createTrackbar(i, trackbarWindowName, 0, 255, onChange);
 
 
     cv::createTrackbar(saveTrackbarName, trackbarWindowName, 0, 1, onChange);
+    cv::createTrackbar(minArea, trackbarWindowName, 0, 200, onChange);
 
 
 }
@@ -101,6 +164,7 @@ bool FindByColor::getSavedTrackbarsValues() {
 }
 
 void FindByColor::csvToVector(std::ifstream& file) {
+
     std::string line;
     std::string cell;
     lower = new std::vector<int>();
@@ -120,6 +184,7 @@ void FindByColor::csvToVector(std::ifstream& file) {
 
 void FindByColor::getTrackbarValue(std::stringstream streamLine, std::vector<int>* trackbarValues) {
     std::string value;
+
     while (std::getline(streamLine, value, ','))
         trackbarValues->push_back(std::stoi(value));
 
@@ -134,6 +199,7 @@ void FindByColor::setTrackbar() {
 }
 
 void FindByColor::setTrackbarValues(std::vector<std::string>* trackbarNames, std::vector<int>* pos) {
+
     for (unsigned int i = 0; i < trackbarNames->size(); i++)
         cv::setTrackbarPos(trackbarNames->at(i), trackbarWindowName, pos->at(i));
 
@@ -142,18 +208,21 @@ void FindByColor::setTrackbarValues(std::vector<std::string>* trackbarNames, std
 }
 
 void FindByColor::getTrackbarsPos() {
+
     getTrackbarPos(trackbarLowerNames, lower);
     getTrackbarPos(trackbarUpperNames, upper);
 }
 
 void FindByColor::getTrackbarPos(std::vector<std::string>* trackbarNames, std::vector<int>* pos) {
     pos->clear();
+
     for (unsigned int i = 0; i < trackbarNames->size(); i++)
         pos->push_back(cv::getTrackbarPos(trackbarNames->at(i), trackbarWindowName));
 
 }
 
 cv::Scalar FindByColor::vectorToScalar(std::vector<int>* pos) {
+
     return cv::Scalar(pos->at(0), pos->at(1), pos->at(2));
 }
 
@@ -162,6 +231,7 @@ void FindByColor::saveTrackbars() {
     std::fstream file(nameOfFileTrackBars, std::fstream::in | std::fstream::out);
 
     if (not file.is_open() or not file.good())
+
         return;
 
     trackbarToStringstream(line, lower);
