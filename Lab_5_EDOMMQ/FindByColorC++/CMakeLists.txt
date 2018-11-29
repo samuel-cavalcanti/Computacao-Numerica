@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 2.6)
 project (findByColor)
 
 find_package( OpenCV REQUIRED ) 
+find_package (Threads)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -28,6 +29,7 @@ add_executable(findByColor
            
 
 target_link_libraries( findByColor ${OpenCV_LIBS} )
+target_link_libraries( findByColor ${CMAKE_THREAD_LIBS_INIT} )
 target_include_directories(findByColor PRIVATE ${INCLUDE_DIRS})
 
 

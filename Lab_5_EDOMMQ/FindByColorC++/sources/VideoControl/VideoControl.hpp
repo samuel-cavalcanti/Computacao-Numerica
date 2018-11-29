@@ -15,21 +15,27 @@
 #define VIDEOCONTROL_HPP
 #include <opencv2/opencv.hpp>
 #include <string>
+#include <thread>
 
 class VideoControl {
 public:
     VideoControl();
     VideoControl(std::string &videoPath);
+    VideoControl( std::string &videoPath,std::string &outputPath );
     VideoControl(const VideoControl& orig);
     bool getFrame(cv::Mat& frame);
     virtual void showVideo(bool loop) = 0;
+    virtual void saveVideo(std::string videoName) = 0;
+    virtual void exit() = 0;
     virtual ~VideoControl();
 protected:
     void setVideoVelocity(int vel);
     cv::Mat currentFrame;
     cv::VideoCapture *cam;
+    cv::VideoWriter* outputVideo;
     std::string videoName;
     std::string windowInput;
+    std::thread* savingVideo;
     void showImageResized(std::string window,cv::Mat& image);
     void control();
 

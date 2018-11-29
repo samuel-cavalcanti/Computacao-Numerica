@@ -10,6 +10,7 @@ int main(int argc, char** argv) {
 
     cv::VideoCapture video(videoName);
     FindByColor test(videoName);
+    //test.saveVideo("teste.mp4");
     test.showVideo(true);
 
 

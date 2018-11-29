@@ -14,6 +14,7 @@
 #include "VideoControl.hpp"
 
 VideoControl::VideoControl(std::string &videoPath) {
+    outputVideo = NULL;
     cam = new cv::VideoCapture(videoPath);
     if (not cam->isOpened())
         std::cout << "video" << videoPath << " not found" << std::endl;
@@ -23,11 +24,28 @@ VideoControl::VideoControl(std::string &videoPath) {
     windowInput = "inputVideo";
     cv::namedWindow(windowInput, cv::WINDOW_NORMAL);
 
+
+}
+
+VideoControl::VideoControl(std::string& videoPath, std::string& outputPath) {
+    cam = new cv::VideoCapture(videoPath);
+    if (not cam->isOpened())
+        std::cout << "video" << videoPath << " not found" << std::endl;
+
+    this->videoName = videoName;
+    velVideo = cam->get(cv::CAP_PROP_FPS);
+    windowInput = "inputVideo";
+    cv::namedWindow(windowInput, cv::WINDOW_NORMAL);
+    cv::Size videoSize((int) cam->get(CV_CAP_PROP_FRAME_WIDTH), (int) cam->get(CV_CAP_PROP_FRAME_HEIGHT));
+    outputVideo = new cv::VideoWriter(videoName, cam->get(cv::CAP_PROP_FOURCC), cam->get(cv::CAP_PROP_FPS), videoSize);
 }
 
 VideoControl::VideoControl() {
     windowInput = "inputVideo";
     cv::namedWindow(windowInput, cv::WINDOW_NORMAL);
+    cam = NULL;
+    outputVideo = NULL;
+    savingVideo = NULL;
 }
 
 VideoControl::VideoControl(const VideoControl& orig) {
@@ -47,7 +65,7 @@ void VideoControl::control() {
             //press ESC
         case 27:
             cam->release();
-            std::exit(0);
+            exit();
             break;
             // press a    
         case 97:
@@ -78,8 +96,6 @@ void VideoControl::showImageResized(std::string window, cv::Mat& image) {
     else
         frame = image;
 
-
     cv::imshow(window, frame);
-   
-
 }
+

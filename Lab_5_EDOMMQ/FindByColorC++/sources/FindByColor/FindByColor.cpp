@@ -16,6 +16,21 @@
 FindByColor::FindByColor(std::string &videoPath) : VideoControl(videoPath) {
     calibrationFrame = new cv::Mat();
     outputFrame = new cv::Mat();
+    inicializeTrackbars();
+    recordFrame = false;
+}
+
+FindByColor::FindByColor(std::string& videoPath, std::string& outputPath) : VideoControl(videoPath, outputPath) {
+    calibrationFrame = new cv::Mat();
+    outputFrame = new cv::Mat();
+    inicializeTrackbars();
+    recordFrame = false;
+    startVideoRecorder();
+
+
+}
+
+void FindByColor::inicializeTrackbars() {
     nameOfFileTrackBars = "lastPosTrackBars.csv";
     trackbarLowerNames = new std::vector<std::string>{"H_MIN", "S_MIN", "V_MIN"};
     trackbarUpperNames = new std::vector<std::string>{"H_MAX", "S_MAX", "V_MAX"};
@@ -26,6 +41,7 @@ FindByColor::FindByColor(std::string &videoPath) : VideoControl(videoPath) {
         lower = new std::vector<int>(3, 0);
         upper = new std::vector<int>(3, 255);
     }
+
 }
 
 FindByColor::FindByColor(const FindByColor& orig) {
@@ -35,12 +51,15 @@ FindByColor::~FindByColor() {
 }
 
 void FindByColor::showVideo(bool loop) {
+
     bool haveFrame = false;
     while (true) {
         haveFrame = cam->read(currentFrame);
         if (haveFrame) {
             imageProcessing();
             showImages();
+            if (savingVideo != NULL)
+                recordFrame = true;
             control();
 
         } else if (loop)
@@ -92,7 +111,7 @@ void FindByColor::getMassCenter() {
 
 bool FindByColor::getTheLargestContours(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours) {
     cv::findContours(*calibrationFrame, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_NONE);
-  //  double maxArea = cv::getTrackbarPos(minArea, trackbarWindowName); testes
+    //  double maxArea = cv::getTrackbarPos(minArea, trackbarWindowName); testes
     double maxArea = 80;
     bool haveContour = false;
 
@@ -114,9 +133,9 @@ bool FindByColor::getTheLargestContours(int& largestContourId, std::vector<cv::V
 void FindByColor::drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, cv::Point2f& massCenter) {
     currentFrame.copyTo(*outputFrame);
 
-   // cv::drawContours(*outputFrame, contours, largestContourId, cv::Scalar(0, 0, 255), 2, 8, hierarchy);
+    // cv::drawContours(*outputFrame, contours, largestContourId, cv::Scalar(0, 0, 255), 2, 8, hierarchy);
 
-    cv::circle(*outputFrame, cv::Point((int) massCenter.x, (int) massCenter.y),1, cv::Scalar(255, 0, 0),2 , -1 );
+    cv::circle(*outputFrame, cv::Point((int) massCenter.x, (int) massCenter.y), 1, cv::Scalar(255, 0, 0), 2, -1);
 
     showImageResized(outputWindow, *outputFrame);
 
@@ -248,4 +267,63 @@ void FindByColor::saveTrackbars() {
 void FindByColor::trackbarToStringstream(std::stringstream& line, std::vector<int>* pos) {
 
     line << pos->at(0) << "," << pos->at(1) << "," << pos->at(2) << std::endl;
+}
+
+void FindByColor::saveVideo(std::string videoName) {
+    if (outputVideo != NULL)
+        delete outputVideo;
+
+    if (savingVideo != NULL) {
+        savingVideo->join();
+        delete savingVideo;
+    }
+
+    cv::Size videoSize((int) cam->get(CV_CAP_PROP_FRAME_WIDTH), (int) cam->get(CV_CAP_PROP_FRAME_HEIGHT));
+    outputVideo = new cv::VideoWriter(videoName, cam->get(cv::CAP_PROP_FOURCC), cam->get(cv::CAP_PROP_FPS), videoSize);
+
+    startVideoRecorder();
+
+
+
+
+
+
+}
+
+void FindByColor::videoRecorder() {
+
+    while (true) {
+
+        if (recordFrame) {
+            outputVideo->write(*outputFrame);
+            recordFrame = false;
+        }
+
+    }
+}
+
+void FindByColor::startVideoRecorder() {
+
+    savingVideo = new std::thread(&FindByColor::videoRecorder, this);
+
+}
+
+void FindByColor::exit() {
+    delete calibrationFrame;
+    delete outputFrame;
+
+    cam->release();
+
+
+    if (savingVideo == NULL)
+        std::exit(0);
+
+    savingVideo->detach();
+    outputVideo->release();
+
+    delete outputVideo;
+    delete savingVideo;
+
+    std::exit(0);
+
 }

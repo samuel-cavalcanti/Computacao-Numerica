@@ -21,12 +21,15 @@
 class FindByColor : public VideoControl {
 public:
     FindByColor(std::string& videoPath);
+    FindByColor(std::string &videoPath, std::string &outputPath);
     FindByColor(const FindByColor& orig);
     void showVideo(bool loop);
+    void saveVideo(std::string videoName);
     virtual ~FindByColor();
 
 private:
     void imageProcessing();
+    void inicializeTrackbars();
     void createTrackbars();
     void setTrackbar();
     void setTrackbarValues(std::vector<std::string>* trackbarNames, std::vector<int>* pos);
@@ -42,7 +45,10 @@ private:
     void calibrationColor();
     void drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, cv::Point2f& massCenter);
     bool getTheLargestContours(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours);
-    
+    void startVideoRecorder();
+    void videoRecorder();
+    void exit();
+
     cv::Scalar vectorToScalar(std::vector<int>* pos);
     static void onChange(int, void*);
     std::string trackbarWindowName;
@@ -57,6 +63,7 @@ private:
     std::vector<int>* upper;
     std::vector<std::string>*trackbarLowerNames;
     std::vector<std::string>*trackbarUpperNames;
+    bool recordFrame;
 
 
 
