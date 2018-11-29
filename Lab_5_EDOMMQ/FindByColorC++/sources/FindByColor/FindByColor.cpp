@@ -17,15 +17,14 @@ FindByColor::FindByColor(std::string &videoPath) : VideoControl(videoPath) {
     calibrationFrame = new cv::Mat();
     outputFrame = new cv::Mat();
     inicializeTrackbars();
-    recordFrame = false;
+
 }
 
 FindByColor::FindByColor(std::string& videoPath, std::string& outputPath) : VideoControl(videoPath, outputPath) {
     calibrationFrame = new cv::Mat();
     outputFrame = new cv::Mat();
     inicializeTrackbars();
-    recordFrame = false;
-    startVideoRecorder();
+
 
 
 }
@@ -57,10 +56,29 @@ void FindByColor::showVideo(bool loop) {
         haveFrame = cam->read(currentFrame);
         if (haveFrame) {
             imageProcessing();
-            showImages();
-            if (savingVideo != NULL)
-                recordFrame = true;
-            control();
+
+#pragma omp parallel
+            {
+#pragma omp sections
+                {
+#pragma omp section
+                    {
+
+                        showImages();
+                        control();
+
+                    }
+#pragma omp section
+                    {
+                        if (outputVideo != NULL)
+                            outputVideo->write(*outputFrame);
+
+                    }
+                } // Aqui há uma barreira implícita
+
+            } // Aqui há uma barreira implícita
+
+
 
         } else if (loop)
             cam->set(cv::CAP_PROP_POS_FRAMES, 0);
@@ -270,41 +288,21 @@ void FindByColor::trackbarToStringstream(std::stringstream& line, std::vector<in
 }
 
 void FindByColor::saveVideo(std::string videoName) {
-    if (outputVideo != NULL)
-        delete outputVideo;
-
-    if (savingVideo != NULL) {
-        savingVideo->join();
-        delete savingVideo;
-    }
+    stopRecorder();
 
     cv::Size videoSize((int) cam->get(CV_CAP_PROP_FRAME_WIDTH), (int) cam->get(CV_CAP_PROP_FRAME_HEIGHT));
     outputVideo = new cv::VideoWriter(videoName, cam->get(cv::CAP_PROP_FOURCC), cam->get(cv::CAP_PROP_FPS), videoSize);
 
-    startVideoRecorder();
-
-
-
-
 
 
 }
 
-void FindByColor::videoRecorder() {
+void FindByColor::stopRecorder() {
 
-    while (true) {
-
-        if (recordFrame) {
-            outputVideo->write(*outputFrame);
-            recordFrame = false;
-        }
-
+    if (outputVideo != NULL) {
+        outputVideo->release();
+        delete outputVideo;
     }
-}
-
-void FindByColor::startVideoRecorder() {
-
-    savingVideo = new std::thread(&FindByColor::videoRecorder, this);
 
 }
 
@@ -315,15 +313,14 @@ void FindByColor::exit() {
     cam->release();
 
 
-    if (savingVideo == NULL)
-        std::exit(0);
+    stopRecorder();
 
-    savingVideo->detach();
-    outputVideo->release();
+
 
     delete outputVideo;
-    delete savingVideo;
 
     std::exit(0);
 
 }
+
+

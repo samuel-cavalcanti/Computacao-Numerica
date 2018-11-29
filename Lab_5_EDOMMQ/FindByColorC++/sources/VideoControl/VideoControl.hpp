@@ -15,7 +15,7 @@
 #define VIDEOCONTROL_HPP
 #include <opencv2/opencv.hpp>
 #include <string>
-#include <thread>
+
 
 class VideoControl {
 public:
@@ -35,7 +35,6 @@ protected:
     cv::VideoWriter* outputVideo;
     std::string videoName;
     std::string windowInput;
-    std::thread* savingVideo;
     void showImageResized(std::string window,cv::Mat& image);
     void control();
 

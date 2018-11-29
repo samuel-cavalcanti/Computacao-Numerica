@@ -45,8 +45,7 @@ private:
     void calibrationColor();
     void drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, cv::Point2f& massCenter);
     bool getTheLargestContours(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours);
-    void startVideoRecorder();
-    void videoRecorder();
+    void stopRecorder();
     void exit();
 
     cv::Scalar vectorToScalar(std::vector<int>* pos);
@@ -63,7 +62,6 @@ private:
     std::vector<int>* upper;
     std::vector<std::string>*trackbarLowerNames;
     std::vector<std::string>*trackbarUpperNames;
-    bool recordFrame;
 
 
 

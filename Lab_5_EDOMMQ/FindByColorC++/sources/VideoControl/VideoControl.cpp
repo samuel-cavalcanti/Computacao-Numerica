@@ -45,7 +45,7 @@ VideoControl::VideoControl() {
     cv::namedWindow(windowInput, cv::WINDOW_NORMAL);
     cam = NULL;
     outputVideo = NULL;
-    savingVideo = NULL;
+   
 }
 
 VideoControl::VideoControl(const VideoControl& orig) {
