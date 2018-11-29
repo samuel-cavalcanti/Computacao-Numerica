@@ -17,6 +17,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <list>
 
 class FindByColor : public VideoControl {
 public:
@@ -25,6 +26,7 @@ public:
     FindByColor(const FindByColor& orig);
     void showVideo(bool loop);
     void saveVideo(std::string videoName);
+    void massCenterPointsToCsv(std::string fileName);
     virtual ~FindByColor();
 
 private:
@@ -41,11 +43,12 @@ private:
     void saveTrackbars();
     void getTrackbarValue(std::stringstream streamLine, std::vector<int>* pos);
     void trackbarToStringstream(std::stringstream &line, std::vector<int>*pos);
-    void getMassCenter();
+    cv::Point2f getMassCenter(int& largestContourId, std::vector< std::vector<cv::Point> >& contours);
     void calibrationColor();
     void drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, cv::Point2f& massCenter);
     bool getTheLargestContours(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours);
     void stopRecorder();
+    std::stringstream pointsToStringstream();
     void exit();
 
     cv::Scalar vectorToScalar(std::vector<int>* pos);
@@ -62,6 +65,8 @@ private:
     std::vector<int>* upper;
     std::vector<std::string>*trackbarLowerNames;
     std::vector<std::string>*trackbarUpperNames;
+    std::list<cv::Point2f>*massCenterPoints;
+    bool showingVideo;
 
 
 

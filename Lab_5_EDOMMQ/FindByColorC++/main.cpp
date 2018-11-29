@@ -12,6 +12,7 @@ int main(int argc, char** argv) {
     FindByColor test(videoName);
   //  test.saveVideo("teste.mp4");
     test.showVideo(true);
+    test.massCenterPointsToCsv("positions.csv");
 
 
     return 0;
