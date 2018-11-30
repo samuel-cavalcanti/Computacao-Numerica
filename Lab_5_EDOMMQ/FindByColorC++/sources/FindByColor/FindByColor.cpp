@@ -16,7 +16,7 @@
 FindByColor::FindByColor(std::string &videoPath) : VideoControl(videoPath) {
     calibrationFrame = new cv::Mat();
     outputFrame = new cv::Mat();
-    massCenterPoints = new std::list<cv::Point2f>();
+    massCenterPoints = new std::list < std::vector<double>>();
     showingVideo = true;
     inicializeTrackbars();
 
@@ -25,7 +25,7 @@ FindByColor::FindByColor(std::string &videoPath) : VideoControl(videoPath) {
 FindByColor::FindByColor(std::string& videoPath, std::string& outputPath) : VideoControl(videoPath, outputPath) {
     calibrationFrame = new cv::Mat();
     outputFrame = new cv::Mat();
-    massCenterPoints = new std::list<cv::Point2f>();
+    massCenterPoints = new std::list < std::vector<double>>();
     showingVideo = true;
     inicializeTrackbars();
 
@@ -86,7 +86,7 @@ void FindByColor::imageProcessing() {
 
     if (not getTheLargestContours(largestContourId, hierarchy, contours))
         return;
-    cv::Point2f currentPoint = getMassCenter(largestContourId, contours);
+    std::vector<double> currentPoint = getMassCenter(largestContourId, contours);
 
     massCenterPoints->push_back(currentPoint);
 
@@ -107,10 +107,15 @@ void FindByColor::calibrationColor() {
 
 }
 
-cv::Point2f FindByColor::getMassCenter(int& largestContourId, std::vector< std::vector<cv::Point> >& contours) {
+std::vector<double> FindByColor::getMassCenter(int& largestContourId, std::vector< std::vector<cv::Point> >& contours) {
     cv::Moments moment = cv::moments(contours[largestContourId]);
 
-    return cv::Point2f(moment.m10 / moment.m00, moment.m01 / moment.m00);
+    std::vector<double>pos = { moment.m10 / moment.m00, moment.m01 / moment.m00, cam->get(cv::CAP_PROP_POS_MSEC)};
+    //    pos.push_back(moment.m10 / moment.m00);
+    //    pos.push_back(moment.m01 / moment.m00);
+    //    pos.push_back(cam->get(cv::CAP_PROP_POS_MSEC));
+
+    return pos;
 
 
 
@@ -137,12 +142,13 @@ bool FindByColor::getTheLargestContours(int& largestContourId, std::vector<cv::V
 
 }
 
-void FindByColor::drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, cv::Point2f& massCenter) {
+void FindByColor::drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, std::vector<double>& massCenter) {
+
     currentFrame.copyTo(*outputFrame);
 
     cv::drawContours(*outputFrame, contours, largestContourId, cv::Scalar(0, 0, 255), 2, 8, hierarchy);
 
-    cv::circle(*outputFrame, cv::Point((int) massCenter.x, (int) massCenter.y), 1, cv::Scalar(255, 0, 0), 2, -1);
+    cv::circle(*outputFrame, cv::Point((int) massCenter[0], (int) massCenter[1]), 1, cv::Scalar(255, 0, 0), 2, -1);
 
     showImageResized(outputWindow, *outputFrame);
 
@@ -277,6 +283,7 @@ void FindByColor::trackbarToStringstream(std::stringstream& line, std::vector<in
 }
 
 void FindByColor::saveVideo(std::string videoName) {
+
     stopRecorder();
 
     cv::Size videoSize((int) cam->get(CV_CAP_PROP_FRAME_WIDTH), (int) cam->get(CV_CAP_PROP_FRAME_HEIGHT));
@@ -289,6 +296,7 @@ void FindByColor::saveVideo(std::string videoName) {
 void FindByColor::stopRecorder() {
 
     if (outputVideo != NULL) {
+
         outputVideo->release();
         delete outputVideo;
     }
@@ -296,6 +304,7 @@ void FindByColor::stopRecorder() {
 }
 
 void FindByColor::exit() {
+
     cam->release();
     stopRecorder();
 
@@ -314,7 +323,6 @@ void FindByColor::massCenterPointsToCsv(std::string fileName) {
 
     file << pointsToStringstream().str();
 
-
     file.close();
 
 
@@ -324,7 +332,7 @@ std::stringstream FindByColor::pointsToStringstream() {
     std::stringstream allPoints;
 
     for (auto point = massCenterPoints->begin(); point != massCenterPoints->end(); point++) {
-        allPoints << (*point).x << "," << (*point).y << std::endl;
+        allPoints << (*point)[0] << "," << (*point)[1] << "," << (*point)[2] << std::endl;
     }
 
     return allPoints;

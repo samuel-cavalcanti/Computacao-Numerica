@@ -43,9 +43,9 @@ private:
     void saveTrackbars();
     void getTrackbarValue(std::stringstream streamLine, std::vector<int>* pos);
     void trackbarToStringstream(std::stringstream &line, std::vector<int>*pos);
-    cv::Point2f getMassCenter(int& largestContourId, std::vector< std::vector<cv::Point> >& contours);
+    std::vector<double> getMassCenter(int& largestContourId, std::vector< std::vector<cv::Point> >& contours);
     void calibrationColor();
-    void drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, cv::Point2f& massCenter);
+    void drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours, std::vector<double>& massCenter);
     bool getTheLargestContours(int& largestContourId, std::vector<cv::Vec4i>& hierarchy, std::vector< std::vector<cv::Point> >& contours);
     void stopRecorder();
     std::stringstream pointsToStringstream();
@@ -65,7 +65,7 @@ private:
     std::vector<int>* upper;
     std::vector<std::string>*trackbarLowerNames;
     std::vector<std::string>*trackbarUpperNames;
-    std::list<cv::Point2f>*massCenterPoints;
+    std::list<std::vector<double>>*massCenterPoints;
     bool showingVideo;
 
 

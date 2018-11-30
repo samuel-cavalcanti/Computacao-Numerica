@@ -31,6 +31,48 @@ function [x,y] =  RK2(a,b,h,y0,df)
     end
 endfunction
 
+function [x,y,z] =  RK2Order2(a,b,h,y0,z0,df1,df2)
+    x= a:h:b
+    y(1)= y0;
+    z(1)= z0;
+    
+    
+    for i=2:length(x)
+        k1y = df1 (x(i-1), y(i-1), z(i-1));
+        k2y = df1 (x(i), y(i-1)+ h*k1y, z(i-1));
+        y(i) = y(i-1) + h/2* (k1y+k2y);
+        
+        k1z = df2 (x(i-1), y(i-1), z(i-1));
+        k2z = df2 (x(i), y(i-1)+ h*k1z, z(i-1));
+        z(i) = z(i-1) + h/2*(k1z + k2z);    
+    end
+endfunction
+
+
+function [x,y,z] =  RK4Order2(a,b,h,y0,z0,df1,df2)
+    x= a:h:b
+    y(1)= y0;
+    z(1)= z0;
+    
+    
+    for i=2:length(x)
+        k1y = df1 (x(i-1), y(i-1), z(i-1));
+        k2y = df1 (x(i-1) + h/2, y(i-1)+ h/2*k1y, z(i-1));
+        k3y = df1 (x(i-1) + h/2, y(i-1)+ h/2*k2y, z(i-1) );
+        k4y = df1 (x(i), y(i-1) + h*k3y, z(i-1));
+        
+        y(i) = y(i-1) + h/6* (k1y + 2*k2y+ 2*k3y +k4y);
+        
+        k1z = df2 (x(i-1), y(i-1), z(i-1));
+        k2z = df2 (x(i-1) + h/2, y(i-1) + h/2*k1z, z(i-1));
+        k3z = df2 (x(i-1) + h/2, y(i-1) + h/2*k2z, z(i-1));
+        k4z = df2 (x(i), y(i-1) + h*k3z, z(i-1));
+        z(i) = z(i-1) + h/6*(k1z + 2*k2z + 2*k3z + k4z);    
+    end
+endfunction
+
+
+
 function a= poli(x,y,k)
     n = length(x);
     
