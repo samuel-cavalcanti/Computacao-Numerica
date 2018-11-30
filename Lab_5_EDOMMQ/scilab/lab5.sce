@@ -92,7 +92,7 @@ endfunction
 
 
 /*
-- Gráfico da solução (momento em que a bola toca no chão) pelo método de EULER
+1- Gráfico da solução (momento em que a bola toca no chão) pelo método de EULER
 com passo h=0.1s e h=0.001s, partindo da primeira imagem. (dois gráficos)
 */
 [t1,t2,y1,y2] = graficoSolucaoEDO(t,y,Euler2,"Euler")
