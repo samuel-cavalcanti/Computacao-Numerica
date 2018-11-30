@@ -10,8 +10,9 @@ int main(int argc, char** argv) {
 
     cv::VideoCapture video(videoName);
     FindByColor test(videoName);
+    test.saveVideo("output.mp4");
     test.showVideo(true);
-    test.massCenterPointsToCsv("positions.csv");
+   // test.massCenterPointsToCsv("positions.csv");
 
 
     return 0;
