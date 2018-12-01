@@ -190,15 +190,25 @@ A($+1)= rk2MMQ;
 5- Gráfico da solução (momento em que a bola toca no chão) pelo método de RK4 com
 passo h=0.1s e h=0.001s, partindo da primeira imagem. (dois gráficos)
 */                                                                // %f é igual a false e  %t é gual a true
-[T($+1),T($+1),Y($+1),Y($+1)] = graficoSolucaoEDO(t,y,RK4Order2,"RK4",%f)
+[T($+1),T($+1),Y($+1),Y($+1)] = graficoSolucaoEDO(t,y,RK4Order2,"RK4",%t)
 
 /*
 6 – Encontre a solução por MMQ linear e de segundo grau utilizando a malha de
 pontos gerada no item anterior. (quatro gráficos)
 */
 rk4MMQ =list();                                                                                // %f é igual a false e  %t é gual a true
-[rk4MMQ($+1),rk4MMQ($+1),rk4MMQ($+1),rk4MMQ($+1)] = GraficoSolucaoMMQ(T(5),T(6),Y(5),Y(6),"RK4",%f);
+[rk4MMQ($+1),rk4MMQ($+1),rk4MMQ($+1),rk4MMQ($+1)] = GraficoSolucaoMMQ(T(5),T(6),Y(5),Y(6),"RK4",%t);
 
 A($+1) = rk4MMQ;
 
 results = resultadosMMQ(A,t)
+//
+//xname("comparação");
+//plot(T(1),Y(1) ,'g');
+//plot(T(3),Y(3) ,'.b');
+//plot(T(5),Y(5) ,'.y');
+//plot(T(7),Y(7) ,'-o-r');
+//
+//legend(["dados Coletados", "Euler h 0.1", "RK2 h 0.1", "RK4 h 0.1" ])
+//
+

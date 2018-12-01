@@ -62,17 +62,20 @@ function [x,y,z] =  RK4Order2(a,b,h,y0,z0,df1,df2)
     
     for i=2:length(x)
         k1y = df1 (x(i-1), y(i-1), z(i-1));
-        k2y = df1 (x(i-1) + h/2, y(i-1)+ h/2*k1y, z(i-1));
-        k3y = df1 (x(i-1) + h/2, y(i-1)+ h/2*k2y, z(i-1) );
-        k4y = df1 (x(i), y(i-1) + h*k3y, z(i-1));
-        
-        y(i) = y(i-1) + h/6* (k1y + 2*k2y+ 2*k3y +k4y);
-        
         k1z = df2 (x(i-1), y(i-1), z(i-1));
-        k2z = df2 (x(i-1) + h/2, y(i-1) + h/2*k1z, z(i-1));
-        k3z = df2 (x(i-1) + h/2, y(i-1) + h/2*k2z, z(i-1));
-        k4z = df2 (x(i), y(i-1) + h*k3z, z(i-1));
-        z(i) = z(i-1) + h/6*(k1z + 2*k2z + 2*k3z + k4z);    
+        
+        k2y = df1 (x(i-1) + h/2, y(i-1)+ h/2*k1y, z(i-1) + h/2*k1z);
+        k2z = df2 (x(i-1) + h/2, y(i-1)+ h/2*k1y, z(i-1) + h/2*k1z);
+        
+        k3z = df2 (x(i-1) + h/2, y(i-1)+ h/2*k2y, z(i-1)  + h/2*k2z);
+        k3y = df1 (x(i-1) + h/2, y(i-1)+ h/2*k2y, z(i-1)  + h/2*k2z);
+        
+        k4y = df1 (x(i), y(i-1) + h*k3y, z(i-1)+ h*k3z);
+        k4z = df2 (x(i), y(i-1) + h*k3y, z(i-1)+ h*k3z);
+        
+        
+        z(i) = z(i-1) + h/6*(k1z + 2*k2z + 2*k3z + k4z);
+        y(i) = y(i-1) + h/6*(k1y + 2*k2y + 2*k3y + k4y);    
     end
 endfunction
 
