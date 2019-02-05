@@ -34,7 +34,6 @@ function [a1,a2,a3,a4]= GraficoSolucaoMMQ(t1,t2,y1,y2,description,plotGraphic)
 
 
     a2 = poli(t1,y1,2);
-    
     if plotGraphic then
          plotResultMMQ(t1,a2,"o-r",description +" h:0.1 MMQ parábola",parable);
     end
@@ -108,8 +107,11 @@ function[t,y] =getData(fileName)
     t = (positions(:,3) - positions(1,3))/1000
 endfunction
 
-function resultadosEDO(T,Y)
-    
+
+function r= resultadosEDO(Y)
+    for i = 2: length(Y)
+        r($+1) = Y(i)($)   
+    end
     
 endfunction
 
@@ -165,7 +167,7 @@ pontos gerada no item anterior. (quatro gráficos)
 */
 
 eulerMMQ = list();                                                             // %f é igual a false e  %t é gual a true
-[eulerMMQ($+1),eulerMMQ($+1),eulerMMQ($+1),eulerMMQ($+1)] = GraficoSolucaoMMQ(T(1),T(2),Y(1),Y(2),"Euler",%f);
+[eulerMMQ($+1),eulerMMQ($+1),eulerMMQ($+1),eulerMMQ($+1)] = GraficoSolucaoMMQ(T(3),T(2),Y(3),Y(2),"Euler",%f);
 
 // uma lista de listas :-) 
 A($+1)= eulerMMQ;
@@ -182,7 +184,7 @@ passo h=0.1s e h=0.001s, partindo da primeira imagem. (dois gráficos)
 pontos gerada no item anterior. (quatro gráficos)
 */
 rk2MMQ =list();                                                                              // %f é igual a false e  %t é gual a true
-[rk2MMQ($+1),rk2MMQ($+1),rk2MMQ($+1),rk2MMQ($+1)] = GraficoSolucaoMMQ(T(3),T(4),Y(3),Y(4),"RK2",%f);
+[rk2MMQ($+1),rk2MMQ($+1),rk2MMQ($+1),rk2MMQ($+1)] = GraficoSolucaoMMQ(T(5),T(4),Y(5),Y(4),"RK2",%f);
 
 A($+1)= rk2MMQ;
 
@@ -190,25 +192,16 @@ A($+1)= rk2MMQ;
 5- Gráfico da solução (momento em que a bola toca no chão) pelo método de RK4 com
 passo h=0.1s e h=0.001s, partindo da primeira imagem. (dois gráficos)
 */                                                                // %f é igual a false e  %t é gual a true
-[T($+1),T($+1),Y($+1),Y($+1)] = graficoSolucaoEDO(t,y,RK4Order2,"RK4",%t)
+[T($+1),T($+1),Y($+1),Y($+1)] = graficoSolucaoEDO(t,y,RK4Order2,"RK4",%f)
 
 /*
 6 – Encontre a solução por MMQ linear e de segundo grau utilizando a malha de
 pontos gerada no item anterior. (quatro gráficos)
 */
 rk4MMQ =list();                                                                                // %f é igual a false e  %t é gual a true
-[rk4MMQ($+1),rk4MMQ($+1),rk4MMQ($+1),rk4MMQ($+1)] = GraficoSolucaoMMQ(T(5),T(6),Y(5),Y(6),"RK4",%t);
+[rk4MMQ($+1),rk4MMQ($+1),rk4MMQ($+1),rk4MMQ($+1)] = GraficoSolucaoMMQ(T(7),T(6),Y(7),Y(6),"RK4",%f);
 
 A($+1) = rk4MMQ;
 
-results = resultadosMMQ(A,t)
-//
-//xname("comparação");
-//plot(T(1),Y(1) ,'g');
-//plot(T(3),Y(3) ,'.b');
-//plot(T(5),Y(5) ,'.y');
-//plot(T(7),Y(7) ,'-o-r');
-//
-//legend(["dados Coletados", "Euler h 0.1", "RK2 h 0.1", "RK4 h 0.1" ])
-//
-
+resultsMMQ = resultadosMMQ(A,t);
+resultsEDO = resultadosEDO(Y);

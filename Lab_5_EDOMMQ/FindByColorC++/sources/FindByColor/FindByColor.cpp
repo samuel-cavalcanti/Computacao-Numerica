@@ -146,7 +146,7 @@ void FindByColor::drawOutput(int& largestContourId, std::vector<cv::Vec4i>& hier
 
     currentFrame.copyTo(*outputFrame);
 
-    //cv::drawContours(*outputFrame, contours, largestContourId, cv::Scalar(0, 0, 255), 2, 8, hierarchy);
+    cv::drawContours(*outputFrame, contours, largestContourId, cv::Scalar(0, 0, 255), 2, 8, hierarchy);
 
     cv::circle(*outputFrame, cv::Point((int) massCenter[0], (int) massCenter[1]), 7, cv::Scalar(255, 0, 0), -1, -1);
 
